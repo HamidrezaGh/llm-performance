@@ -11,7 +11,7 @@ Kernel-level profiling (Nsight, eBPF)
 Open-source contributions
 
 **Target Roles:** Performance Engineer / LLM Systems Engineer @
-Anthropic • OpenAI • Google DeepMind • Meta
+Anthropic • OpenAI • Google DeepMind • Meta • NVIDIA 
 
 ---
 
