@@ -1,5 +1,5 @@
 
-# 🚀 NOTES - NVIDIA GPU Architecture – Fundamental Notes
+# 🚀 NVIDIA GPU Architecture – Fundamental Notes
 
 ---
 
