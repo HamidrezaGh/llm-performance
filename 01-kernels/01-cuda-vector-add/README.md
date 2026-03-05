@@ -22,7 +22,7 @@
 - CUDA event-based accurate timing
 - Explicit host/device memory transfers
 
-**Setup**: See [`CUDA-Colab-Setup-Guide.md`](../CUDA-Colab-Setup-Guide.md) in the root for full instructions on running CUDA code in Colab.
+**Setup**: See [`CUDA-Colab-Setup-Guide.md`](CUDA-Colab-Setup-Guide.md) in the root for full instructions on running CUDA code in Colab.
 
 **Next Steps (Week 2)**:
 - Implement tiled matrix multiplication with shared memory
