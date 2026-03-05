@@ -1,5 +1,52 @@
+# 🚀 CUDA & NVIDIA GPU Architecture – Fundamentals
 
-# 🚀 NVIDIA GPU Architecture – Fundamental Notes
+**This file is the main learning source for CUDA.** Read it first to build your mental model before diving into the hands-on labs in the subfolders.
+
+---
+
+# 📂 Labs in This Folder
+
+| Lab | Topic |
+|-----|-------|
+| [`01-cuda-vector-add/`](./01-cuda-vector-add/) | First CUDA kernel – vector addition |
+| [`02-cuda-tiled-matmul/`](./02-cuda-tiled-matmul/) | Tiled matrix multiplication |
+| [`03-cuda-fused-gemm/`](./03-cuda-fused-gemm/) | Fused GEMM (matrix multiply) |
+| [`04-triton-softmax/`](./04-triton-softmax/) | Triton – softmax kernel |
+| [`05-triton-layernorm/`](./05-triton-layernorm/) | Triton – layer normalization |
+| [`06-triton-rotary/`](./06-triton-rotary/) | Triton – rotary embeddings |
+| [`07-group-gemm/`](./07-group-gemm/) | Grouped GEMM |
+
+---
+
+# 0️⃣ What is CUDA? (Software Basics)
+
+**CUDA** (Compute Unified Device Architecture) is NVIDIA's platform for programming GPUs. It extends C/C++ with:
+
+* **Kernels** – functions that run on the GPU (marked with `__global__`)
+* **APIs** – `cudaMalloc`, `cudaMemcpy`, `cudaFree` to manage GPU memory
+* **Launch syntax** – `kernel<<<blocks, threads>>>(args)` to run code in parallel
+
+## Host vs Device
+
+| Term | Meaning |
+|------|---------|
+| **Host** | The CPU and its RAM. Your `main()` runs here. |
+| **Device** | The GPU and its memory. Kernels run here. |
+
+Data lives in separate spaces. You must **copy** data between host and device explicitly.
+
+## Typical CUDA Program Flow
+
+```text
+1. Allocate memory on HOST    (malloc)
+2. Allocate memory on DEVICE (cudaMalloc)
+3. Copy HOST → DEVICE       (cudaMemcpy)
+4. Launch kernel on GPU     (kernel<<<...>>>)
+5. Copy DEVICE → HOST       (cudaMemcpy)
+6. Free all memory          (cudaFree, free)
+```
+
+The first lab ([`01-cuda-vector-add/`](./01-cuda-vector-add/)) implements this exact flow with detailed comments.
 
 ---
 
