@@ -86,6 +86,11 @@ Hardware: A100 (Google Colab) | [`03-inference-optimization/01-torch-compile-lla
   03-performance-model/              Planned — Throughput/latency simulator
   04-scaling-experiments/            Planned — Scaling curves
   05-system-benchmark-report/        Planned — Capstone report
+
+06-capstone-mini-vllm/            Capstone: LLM Inference Engine from Scratch
+                                     Planned — Paged KV cache, continuous batching,
+                                     streaming tokens, scheduler, GPU worker.
+                                     A mini-vLLM tying all phases together.
 ```
 
 ---

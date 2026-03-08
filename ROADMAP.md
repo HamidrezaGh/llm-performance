@@ -483,6 +483,94 @@ These 12 advanced projects map to specific roadmap items:
 
 ---
 
+## Capstone: Mini-vLLM — LLM Inference Engine from Scratch
+
+This is the project that elevates the portfolio from "good exercises" to "this person can build
+real infrastructure." Build a simplified but functional LLM inference engine that integrates
+every skill from Phases 1–5 into a single system.
+
+Systems like vLLM achieve 10–24x throughput improvements over naive serving by optimizing
+memory management and KV cache handling. Building even a simplified version demonstrates
+the kind of end-to-end systems thinking that frontier labs hire for.
+
+### Architecture
+
+```
+┌─────────────────────────────────────────────────┐
+│                   API Server                     │
+│              (HTTP + streaming)                   │
+├─────────────────────────────────────────────────┤
+│                   Scheduler                      │
+│   ┌─────────────┐  ┌──────────────────────┐     │
+│   │ Request Queue│  │ Admission Controller │     │
+│   └──────┬──────┘  └──────────┬───────────┘     │
+│          │                    │                   │
+│   ┌──────▼────────────────────▼───────────┐     │
+│   │        Continuous Batching Engine       │     │
+│   │  (iteration-level, not request-level)  │     │
+│   └──────────────────┬─────────────────────┘     │
+├──────────────────────┼──────────────────────────┤
+│                 GPU Worker                        │
+│   ┌──────────────────▼─────────────────────┐     │
+│   │           KV Cache Manager              │     │
+│   │  ┌────────────┐  ┌──────────────────┐  │     │
+│   │  │ Page Table  │  │ Block Allocator  │  │     │
+│   │  └────────────┘  └──────────────────┘  │     │
+│   └──────────────────┬─────────────────────┘     │
+│   ┌──────────────────▼─────────────────────┐     │
+│   │         Model Execution Engine          │     │
+│   │   (prefill + decode, custom kernels)    │     │
+│   └────────────────────────────────────────┘     │
+└─────────────────────────────────────────────────┘
+```
+
+### Components
+
+| Component | Responsibility |
+|---|---|
+| **API Server** | Accept requests via HTTP, stream tokens back as they are generated |
+| **Scheduler** | Manage request queue, decide which requests to run each iteration, handle preemption |
+| **Continuous Batcher** | Group prefill and decode requests into efficient batches, re-batch every iteration |
+| **KV Cache Manager** | Paged block allocation for KV cache, track per-request page tables, reclaim memory on completion |
+| **GPU Worker** | Execute the model forward pass, manage CUDA streams, report memory state back to scheduler |
+| **Model Runner** | Load the model, run prefill (prompt processing) and decode (token generation) steps, plug in custom Triton kernels |
+
+### Key Design Decisions
+
+- **Paged KV cache** — fixed-size blocks allocated on demand, eliminating memory fragmentation and waste
+- **Iteration-level scheduling** — re-evaluate the batch every decode step, not just at request arrival
+- **Prefill/decode separation** — prefill is compute-bound (process full prompt), decode is memory-bound (generate one token) — schedule them differently
+- **Preemption** — when memory is exhausted, swap or recompute lower-priority requests
+- **Streaming output** — tokens returned to the client as they are generated, not after full completion
+
+### Deliverables
+
+- Working inference engine serving a 7B model on a single GPU
+- Paged KV cache with block allocator and page tables
+- Continuous batching scheduler with admission control
+- HTTP API with streaming token output
+- Load test harness with synthetic traffic (Poisson arrivals, variable prompt/generation lengths)
+- Benchmark comparison against HuggingFace `generate()` baseline
+
+### Metrics
+
+| Metric | Target |
+|---|---|
+| Throughput (tokens/sec) | ≥3x vs naive `generate()` at high concurrency |
+| Time-to-first-token (TTFT) p99 | <500ms at 10 concurrent requests |
+| Memory utilization | >90% KV cache occupancy under load (minimal waste) |
+| Max concurrent requests | 4x+ vs static batching at same GPU memory |
+| Token streaming latency | First token streamed within one decode step |
+
+### What This Proves
+
+- You understand the full inference serving stack, not just individual kernels
+- You can integrate KV cache, batching, scheduling, and GPU execution into a working system
+- You can reason about memory-bound vs compute-bound phases and schedule accordingly
+- You can build something that works under real load, not just on toy benchmarks
+
+---
+
 ## README Integrity Rule
 
 **Do not list a project as complete or benchmarked in the main README until the code, benchmarks,
