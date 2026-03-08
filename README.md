@@ -1,238 +1,124 @@
-# LLM Systems Performance Engineering Portfolio
+# LLM Performance Engineering
 
-### CUDA • Triton • Distributed Inference • Kernel Debugging • Quantization
+**CUDA | Triton | Inference Optimization | Distributed Systems | GPU Profiling**
 
-**Objective:** Engineer high-throughput, low-latency, fault-tolerant LLM serving systems optimized for multi-GPU A100/H100 clusters.
+A hands-on portfolio of GPU performance engineering projects, progressing from low-level CUDA kernels to production LLM inference and distributed training systems.
 
-**Scope:**
-24 production-grade GPU + distributed systems implementations
-Real A100 benchmarks
-Kernel-level profiling (Nsight, eBPF)
-Open-source contributions
+**Target roles:** Performance Engineer / LLM Systems Engineer at Anthropic, OpenAI, Google DeepMind, Meta, NVIDIA
 
-**Target Roles:** Performance Engineer / LLM Systems Engineer @
-Anthropic • OpenAI • Google DeepMind • Meta • NVIDIA 
+See [`ROADMAP.md`](./ROADMAP.md) for the full project plan with goals, deliverables, and metrics for each project.
 
 ---
 
-# 🔥 Performance Highlights (Benchmarked)
+## Completed Projects
 
-* ✔ 3×+ throughput improvements via kernel fusion
-* ✔ p99 latency reduction through CUDA stream overlap
-* ✔ Custom Triton transformer ops replacing PyTorch baselines
-* ✔ Continuous batching engine outperforming naive inference ≥2.5×
-* ✔ 70B model multi-GPU serving with fault injection testing
-* ✔ eBPF-based network latency root-cause tracing
+### CUDA Vector Addition — 66x Speedup over CPU
+Custom CUDA kernel for 100M-element vector addition. Grid-stride loop, explicit memory management, CUDA event timing.
+
+| Implementation | Time (ms) | Speedup vs CPU |
+|---|---:|---:|
+| CPU (sequential) | 320.20 | 1x |
+| PyTorch | 51.24 | 6.25x |
+| **CUDA kernel** | **4.81** | **66.6x** |
+
+Hardware: A100 (Google Colab) | [`01-gpu-fundamentals/01-cuda-vector-add/`](./01-gpu-fundamentals/01-cuda-vector-add/)
 
 ---
 
-# 📁 Repository Structure
+### Tiled Matrix Multiplication — 6.4x Speedup via Shared Memory
+Tiled GEMM using `__shared__` memory vs naive CUDA kernel. Demonstrates memory coalescing and tile-size optimization.
+
+| Implementation | Time (ms) | Relative Speed |
+|---|---:|---:|
+| Naive CUDA | 168.39 | 1.0x |
+| Tiled CUDA (`__shared__`) | 26.48 | 6.4x vs naive |
+| PyTorch (`@`) | 134.71 | 5.1x slower than tiled |
+
+Hardware: A100 (Google Colab) | [`01-gpu-fundamentals/02-cuda-tiled-matmul/`](./01-gpu-fundamentals/02-cuda-tiled-matmul/)
+
+---
+
+### torch.compile on Llama-3.1-8B-Instruct
+Baseline vs compiled inference performance using `torch.compile`. First LLM inference benchmark in the portfolio. 4-bit quantization with bitsandbytes.
+
+Hardware: A100 (Google Colab) | [`03-inference-optimization/01-torch-compile-llama8b/`](./03-inference-optimization/01-torch-compile-llama8b/)
+
+---
+
+## Repository Structure
 
 ```
-/kernels
-    /cuda-vector-add
-    /cuda-tiled-matmul
-    /cuda-fused-gemm
-    /triton-softmax
-    /triton-layernorm
-    /triton-rotary
-    /group-gemm
+01-gpu-fundamentals/              Phase 1: GPU Architecture & CUDA
+  01-cuda-vector-add/             ✅ Complete
+  02-cuda-tiled-matmul/           ✅ Complete
+  03-nsight-profiling/               Planned — GPU profiling workflow
+  04-fused-gemm-bias-relu/           Planned — Kernel fusion
+  05-memory-bandwidth-roofline/      Planned — Roofline model analysis
+  06-warp-reductions/                Planned — Warp shuffle primitives
 
-/inference-optimization
-    /torch-compile-llama8b
-    /triton-in-llama
-    /continuous-batching
-    /70b-multi-gpu-serving
+02-transformer-kernels/           Phase 2: Transformer Internals
+  01-triton-softmax/                 Planned — Fused softmax in Triton
+  02-triton-layernorm/               Planned — Fused LayerNorm
+  03-triton-rope/                    Planned — Rotary embeddings
+  04-naive-attention/                Planned — Scaled dot-product attention baseline
+  05-flash-attention/                Planned — Flash Attention v2
+  06-kernel-replacement-llama/       Planned — Custom kernels in Llama
+  07-group-gemm/                     Planned — Batched GEMM for MoE
 
-/distributed-systems
-    /multi-gpu-serving
-    /custom-load-balancer
-    /fault-tolerant-topology
+03-inference-optimization/        Phase 3: Inference Performance
+  01-torch-compile-llama8b/       ✅ Partial — needs compile mode sweep
+  02-kv-cache-paged-attention/       Planned — PagedAttention
+  03-continuous-batching/            Planned — Minimal LLM inference engine
+  04-speculative-decoding/           Planned — Draft model acceleration
+  05-70b-multi-gpu-serving/          Planned — Tensor parallel serving
+  06-quantization-fp8-int4/          Planned — FP8/INT4 quantization
 
-/observability
-    /ebpf-latency-debugger
+04-distributed-systems/           Phase 4: Distributed LLM Systems
+  01-fsdp-training/                  Planned — Distributed fine-tuning
+  02-tp-pp-comparison/               Planned — Parallelism tradeoffs
+  03-multi-node-training/            Planned — Multi-node scaling
+  04-fault-tolerant-cluster/         Planned — Fault injection testing
+  05-gpu-load-balancer/              Planned — GPU-aware routing
 
-/quantization
-    /fp8-kernels
-    /int4-kernels
-    /quant-aware-training
-
-/performance-modeling
-    /throughput-latency-simulator
+05-benchmarking-profiling/        Phase 5: Benchmarking & Profiling
+  01-benchmark-harness/              Planned — Standardized framework
+  02-profiling-guide/                Planned — Nsight workflow guide
+  03-performance-model/              Planned — Throughput/latency simulator
+  04-scaling-experiments/            Planned — Scaling curves
+  05-system-benchmark-report/        Planned — Capstone report
 ```
 
 ---
 
-# ⚙️ Kernel Engineering (CUDA + Triton)
+## Skills Demonstrated (so far)
 
-## CUDA Optimization
+- CUDA kernel development (grid-stride loops, shared memory tiling)
+- Host/device memory management
+- CUDA event-based timing and benchmarking
+- GPU performance comparison (CUDA vs PyTorch vs CPU)
+- LLM inference with torch.compile and quantization
 
-* High-performance vector addition (Nsight profiled)
-* Tiled matrix multiplication with shared memory
-* Fused GEMM with stream-level concurrency
-* Memory coalescing + occupancy tuning
-* Warp-level reduction strategies
+## Skills In Progress
 
-**Focus Areas**
-
-* Global memory bandwidth utilization
-* SM occupancy
-* Register pressure
-* Stream overlap
-* Kernel fusion strategies
-
----
-
-## Triton Kernel Development
-
-* Fused Softmax (numerically stable, block-optimized)
-* LayerNorm with memory-efficient reduction
-* Rotary embedding kernel
-* Group GEMM implementation
-* PyTorch extension packaging (setup.py + loadable ops)
-
-**Impact**
-
-* Transformer op replacement inside Llama architecture
-* End-to-end latency reduction measured on A100
+- GPU profiling (Nsight Systems / Nsight Compute)
+- Triton kernel development
+- Flash Attention
+- KV cache optimization
+- Continuous batching
+- Distributed training (FSDP, tensor/pipeline parallelism)
 
 ---
 
-# 🚀 LLM Inference Optimization
+## Hardware
 
-## torch.compile Optimization
+All benchmarks run on **NVIDIA A100** via Google Colab unless otherwise noted.
 
-* Benchmarked Llama-3.1-8B across compile modes
-* Analyzed graph breaks + kernel fusion effects
-* Measured compile overhead vs inference gains
+## Setup
 
-## Transformer Kernel Replacement
+```bash
+git clone https://github.com/HamidrezaGh/llm-performance.git
+cd llm-performance
+pip install -r requirements.txt
+```
 
-Replaced:
-
-* Softmax
-* Rotary embeddings
-* LayerNorm
-
-With custom Triton kernels.
-
-**Result:** End-to-end throughput increase under realistic batch workloads.
-
----
-
-## Continuous Batching Engine (From Scratch)
-
-* Implemented dynamic batching scheduler
-* Token-level queue management
-* Memory-aware request packing
-* Outperformed naive PyTorch baseline ≥2.5×
-
----
-
-## 70B Multi-GPU Serving
-
-* 4× A100 deployment
-* Tensor parallel configuration
-* Throughput dashboard (tok/sec, p95, p99)
-* Real benchmark publication
-
----
-
-# 🌐 Distributed Systems & Reliability
-
-## 8-GPU Fault-Tolerant Cluster
-
-* Ray/vLLM cluster orchestration
-* Fault injection scenarios
-* Node recovery + request redistribution
-* Throughput degradation analysis
-
-## Custom Load Balancer
-
-* Python + Rust implementation
-* GPU-aware scheduling
-* Backpressure control
-* Adaptive queue depth
-
----
-
-# 🔍 Observability & Kernel-Level Debugging
-
-## eBPF Latency Debugger
-
-* Traced container network microbursts
-* Identified syscall-level latency spikes
-* Visualized per-request kernel timings
-* Root-cause isolation methodology
-
-Inspired by real-world AI infra debugging scenarios.
-
----
-
-# 📉 Quantization & Low-Precision Inference
-
-## FP8 + INT4 Kernels
-
-* Custom Triton low-precision kernels
-* Quant-aware benchmarking
-* Memory footprint reduction
-* Throughput vs accuracy tradeoff analysis
-
----
-
-# 📊 System Performance Modeling
-
-## Throughput & Latency Simulator
-
-Python-based predictive model:
-
-* GPU count scaling
-* Batch size sensitivity
-* Token generation rate
-* Network bandwidth constraints
-* Topology simulation
-
-Used to:
-
-* Predict cluster capacity
-* Estimate cost-performance tradeoffs
-* Model bottlenecks before deployment
-
----
-
-# 🧠 Engineering Principles
-
-* Measure first, optimize second
-* Always profile (Nsight > guesswork)
-* Optimize for p99, not average
-* Remove bottlenecks at the system level
-* Treat inference like a distributed systems problem
-
----
-
-# 📈 Open Source Contributions
-
-* PR #1 – vLLM improvement
-* PR #2 – PyTorch or vLLM kernel fix
-* Public benchmarks + reproducible experiments
-* Technical blog series documenting findings
-
----
-
-# 🎯 Outcome
-
-This portfolio demonstrates:
-
-* GPU kernel engineering capability
-* LLM inference optimization
-* Distributed systems reliability
-* Kernel-level observability
-* Quantization & low-precision production readiness
-
-Designed for senior-level AI infrastructure roles at:
-
-Anthropic
-OpenAI
-Google DeepMind
-Meta
-NVIDIA
+See individual project READMEs for specific build and run instructions.
