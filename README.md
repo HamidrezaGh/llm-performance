@@ -127,3 +127,5 @@ pip install -r requirements.txt
 ```
 
 See individual project READMEs for specific build and run instructions.
+
+For Mac users developing on remote GPUs, see [`REMOTE_POD_SETUP.md`](./REMOTE_POD_SETUP.md).
